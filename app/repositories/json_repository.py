@@ -1,6 +1,6 @@
 import asyncio
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional
 from uuid import uuid4
@@ -13,10 +13,11 @@ from app.schemas.todo import TodoCreate, TodoResponse, TodoUpdate
 class JSONTodoRepository(BaseTodoRepository):
     """JSON file implementation of the Todo repository."""
 
-    def __init__(self, file_path: Path = settings.todos_file_path):
-        self.file_path = file_path
+    def __init__(self, file_path: Optional[Path] = None):
+        self.file_path = file_path if file_path is not None else settings.todos_file_path
         self._lock = asyncio.Lock()
         self._ensure_file_exists()
+
 
     def _ensure_file_exists(self) -> None:
         """Create the directory and initial empty JSON file if they don't exist."""
@@ -64,7 +65,7 @@ class JSONTodoRepository(BaseTodoRepository):
         """Create and store a new todo."""
         async with self._lock:
             raw_data = await self._read_file()
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             
             new_todo = TodoResponse(
                 id=str(uuid4()),
@@ -93,7 +94,7 @@ class JSONTodoRepository(BaseTodoRepository):
                     # Update fields if provided
                     update_data = todo_in.model_dump(exclude_unset=True)
                     updated_fields = existing_todo.model_copy(update=update_data)
-                    updated_fields.updated_at = datetime.utcnow()
+                    updated_fields.updated_at = datetime.now(timezone.utc)
                     
                     updated_dict = json.loads(updated_fields.model_dump_json())
                     raw_data[index] = updated_dict
@@ -101,6 +102,7 @@ class JSONTodoRepository(BaseTodoRepository):
                     
                     return updated_fields
             return None
+
 
     async def delete(self, todo_id: str) -> bool:
         """Delete a todo by ID."""

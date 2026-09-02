@@ -38,7 +38,7 @@ def test_crud_todo_workflow(tmp_path):
     response = client.get("/api/v1/todos/")
     assert response.status_code == 200
     todos_list = response.json()
-    assert len(todos_list) == 21
+    assert len(todos_list) == 1
 
     # 4. Update Todo
     update_payload = {"is_completed": True}

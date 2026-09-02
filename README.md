@@ -33,6 +33,8 @@ IA-Tests/
 │   └── main.py                     # Point d'entrée de l'application
 ├── data/
 │   └── todos.json                  # Stockage JSON persistant
+├── tests/
+│   ├── test_todos.py
 ├── pyproject.toml
 └── README.md
 ```
@@ -58,3 +60,14 @@ L'API sera accessible sur `http://127.0.0.1:8000`.
 
 ### 3. Utilisation Swagger
 Rendez-vous sur [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) pour tester les endpoints interactivement.
+
+### 4. Exécution des tests unitaires avec Pytest
+Pour exécuter les tests unitaires et vérifier le bon fonctionnement de l'API :
+```bash
+uv run pytest
+```
+Pour afficher des détails supplémentaires sur l'exécution des tests :
+```bash
+uv run pytest -v
+```
+

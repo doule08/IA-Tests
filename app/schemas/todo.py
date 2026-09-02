@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from uuid import UUID, uuid4
 
@@ -61,17 +61,15 @@ class TodoResponse(TodoBase):
         description="Unique identifier for the Todo"
     )
     created_at: datetime = Field(
-        default_factory=datetime.utcnow,
+        default_factory=lambda: datetime.now(timezone.utc),
         description="Timestamp when the Todo was created"
     )
     updated_at: datetime = Field(
-        default_factory=datetime.utcnow,
+        default_factory=lambda: datetime.now(timezone.utc),
         description="Timestamp when the Todo was last updated"
     )
 
     model_config = {
-        "from_attributes": True,
-        "json_encoders": {
-            datetime: lambda v: v.isoformat()
-        }
+        "from_attributes": True
     }
+
