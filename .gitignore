@@ -23,3 +23,5 @@ htmlcov/
 
 # Local data (optional to ignore or keep)
 # data/todos.json
+
+node_modules
