@@ -1,7 +1,31 @@
 import pytest
+import asyncio
 from fastapi.testclient import TestClient
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+
 from app.main import app
-from app.core.config import settings
+from app.db.session import Base, get_db_session
+
+TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+
+test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
+TestingSessionLocal = async_sessionmaker(
+    bind=test_engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+    autocommit=False,
+    autoflush=False
+)
+
+
+async def override_get_db_session():
+    async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    async with TestingSessionLocal() as session:
+        yield session
+
+
+app.dependency_overrides[get_db_session] = override_get_db_session
 
 client = TestClient(app)
 
@@ -12,11 +36,7 @@ def test_root_endpoint():
     assert "Bienvenue sur l'API ToDo List!" in response.json()["message"]
 
 
-def test_crud_todo_workflow(tmp_path):
-    # Override settings file path for testing
-    test_json_file = tmp_path / "test_todos.json"
-    settings.todos_file_path = test_json_file
-
+def test_crud_todo_workflow():
     # 1. Create a Todo
     create_payload = {
         "title": "Acheter du lait",

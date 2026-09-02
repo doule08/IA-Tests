@@ -1,18 +1,21 @@
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.repositories.json_repository import JSONTodoRepository
+from app.db.session import get_db_session
+from app.repositories.postgres_repository import PostgresTodoRepository
 from app.schemas.todo import TodoCreate, TodoResponse, TodoUpdate
 from app.services.todo_service import TodoService
 
 router = APIRouter()
 
 
-def get_todo_service() -> TodoService:
-    """Dependency provider for TodoService using JSON repository."""
-    repository = JSONTodoRepository()
+def get_todo_service(db: AsyncSession = Depends(get_db_session)) -> TodoService:
+    """Dependency provider for TodoService using PostgreSQL repository."""
+    repository = PostgresTodoRepository(session=db)
     return TodoService(repository=repository)
+
 
 
 @router.get(
