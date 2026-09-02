@@ -1,3 +1,10 @@
+"""
+Point d'entrée principal de l'application FastAPI ToDo List.
+
+Ce module instancie l'application FastAPI, configure les middlewares (CORS),
+gère les événements de cycle de vie (lifespan DB) et inclut le routeur d'API v1.
+"""
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,16 +15,23 @@ from app.db.session import init_db
 
 
 @asynccontextmanager
-async def lifespan(_app: FastAPI):  # _app is unused but required
-    """Lifespan event handler to initialize database tables on startup."""
+async def lifespan(_app: FastAPI):
+    """
+    Gestionnaire d'événement de cycle de vie (Lifespan) de l'application FastAPI.
+
+    Initialise les tables de la base de données PostgreSQL au démarrage de l'application.
+
+    Args:
+        _app (FastAPI): Instance de l'application FastAPI.
+    """
     try:
         await init_db()
     except Exception as e:
-        print(
-            f"[Warning] Could not initialize database tables at startup: {e}")
+        print(f"[Warning] Impossible d'initialiser les tables au démarrage : {e}")
     yield
 
 
+# Instance principale de l'application FastAPI
 app = FastAPI(
     title=settings.api_title,
     version=settings.api_version,
@@ -28,7 +42,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Configuration CORS pour autoriser l'accès ultérieur par des frontends / backends consommateurs
+# Configuration du middleware CORS pour autoriser les requêtes cross-origin
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -37,14 +51,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# Enregistrement du routeur v1
+# Ingestion des routes v1
 app.include_router(api_router, prefix=settings.api_v1_prefix)
 
 
 @app.get("/", tags=["healthcheck"])
 async def root():
-    """Endpoint racine pour vérifier la santé de l'API."""
+    """
+    Endpoint racine de contrôle de santé (Healthcheck).
+
+    Returns:
+        dict: Message de bienvenue, lien vers la doc et version de l'API.
+    """
     return {
         "message": "Bienvenue sur l'API ToDo List!",
         "docs": "/docs",

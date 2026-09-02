@@ -1,3 +1,10 @@
+"""
+Modèles ORM SQLAlchemy pour l'entité Todo.
+
+Ce module définit la structure des tables en base de données PostgreSQL 
+représentant les tâches ToDo.
+"""
+
 from datetime import datetime, timezone
 from uuid import uuid4
 
@@ -8,7 +15,17 @@ from app.db.session import Base
 
 
 class TodoModel(Base):
-    """SQLAlchemy ORM Model for ToDo items in PostgreSQL."""
+    """
+    Modèle ORM représentant la table `todos` en base de données PostgreSQL.
+
+    Attributes:
+        id (str): Identifiant unique UUIDv4 de la tâche (clé primaire).
+        title (str): Titre / Intitulé de la tâche (max 200 caractères).
+        description (Optional[str]): Description détaillée optionnelle.
+        is_completed (bool): Statut de réalisation (par défaut False).
+        created_at (datetime): Horodatage avec fuseau horaire de la création.
+        updated_at (datetime): Horodatage avec fuseau horaire de la dernière mise à jour.
+    """
 
     __tablename__ = "todos"
 
